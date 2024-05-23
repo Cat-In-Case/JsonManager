@@ -15,10 +15,10 @@ using Newtonsoft.Json.Utilities;
 #endregion
 
 //Read Json on Runtime
-public abstract class BaseJsonParser<DICTIONARY, CLASS> : IDisposable where DICTIONARY : BaseJsonDictionary<CLASS>,  new()
+public abstract class BaseJsonRuntimeParser<DICTIONARY, CLASS> : IDisposable where DICTIONARY : BaseJDictionary<CLASS>,  new()
 {
     protected const string DATA_KEY_STRING = "data";
-    protected BaseJsonParser()    {    }
+    protected BaseJsonRuntimeParser()    {    }
     protected JObject root; protected JObject data;
     [SerializeField] protected string json { get; set; }
     public virtual async Task<DICTIONARY> Read()

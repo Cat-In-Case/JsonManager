@@ -15,14 +15,14 @@ using CustomDictionary.SerializableDictionary;
 
 #region Base
 [System.Serializable]
-public abstract class BaseJsonDictionary<T> : SerializableDictionary<int, T>
+public abstract class BaseJDictionary<T> : SerializableDictionary<int, T>
 {
     //Base Dictionary for JsonParse
     public abstract void FromJArray(ref JArray jarray);
     public abstract void ToJArray(ref JArray jarray);
 }
 [System.Serializable]
-public abstract class BaseJsonBlock<DICTIONARY, STRUCT, ClASS> where DICTIONARY : BaseJsonDictionary<ClASS>
+public abstract class BaseJArray<DICTIONARY, STRUCT, ClASS> where DICTIONARY : BaseJDictionary<ClASS>
 {
     protected const string DATA_KEY_STRING = "data";
     protected const string UNIQUEID = "uniqueID";
@@ -39,7 +39,9 @@ public abstract class BaseJsonBlock<DICTIONARY, STRUCT, ClASS> where DICTIONARY 
             this.logging = logging;
         }
     }
-    protected virtual void Generate()
+
+    //Generate Base
+    public virtual void Generate()
     {
         root = new JObject();
         data = new JObject();
@@ -48,6 +50,9 @@ public abstract class BaseJsonBlock<DICTIONARY, STRUCT, ClASS> where DICTIONARY 
 
     //Read JsonString
     public abstract void Read(string jsonData); //Use only one JArray
+
+    //Use multiple JArray from one root + array Check
+    public abstract void Read(ref JObject root, ref JObject data);
 
     //Use multiple JArray from one root
     public abstract void Read(ref JObject root, ref JObject data, ref JArray array);

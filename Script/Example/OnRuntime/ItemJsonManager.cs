@@ -23,8 +23,10 @@ public interface IJsonText
     public void Refresh();
 }
 
-//
-public class ItemJsonLoader : MonoBehaviour
+/// <summary>
+/// ItemJsonDic, ItemParser
+/// </summary>
+public class ItemJsonManager : MonoBehaviour
 {
 
     [SerializeField] private ItemJsonDic dicionary;
@@ -87,7 +89,7 @@ public class ItemJsonLoader : MonoBehaviour
             fileLoad.Dispose();
         }
 
-        using(ItemParser parser = new ItemParser(jsonData))
+        using(ItemRuntimeParser parser = new ItemRuntimeParser(jsonData))
         {
             Task<ItemJsonDic> parse = Task <ItemJsonDic>.Run(() => parser.Read());
             yield return new WaitUntil(() => parse.IsCompleted);

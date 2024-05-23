@@ -47,7 +47,7 @@ public struct ItemJsonStruct
 
 #region ItemJsonDictionary
 [System.Serializable]
-public class ItemJsonDic : BaseJsonDictionary<ItemJsonData>
+public class ItemJsonDic : BaseJDictionary<ItemJsonData>
 {
     public override void FromJArray(ref JArray jarray)
     {
@@ -85,13 +85,16 @@ public class ItemJsonDic : BaseJsonDictionary<ItemJsonData>
 #endregion
 
 
-public class ItemJsonBlock : BaseJsonBlock<ItemJsonDic, ItemJsonStruct, ItemJsonData>
+public class ItemJsonJArray : BaseJArray<ItemJsonDic, ItemJsonStruct, ItemJsonData>
 {
     protected JArray items;
 
     protected const string JArray_Name = "Items";
-
-    public ItemJsonBlock(Action<string> logging = null)
+    public override string GetJson()
+    {
+        return root.ToString();
+    }
+    public ItemJsonJArray(Action<string> logging = null)
     {
         if(logging == null)
         {
@@ -102,7 +105,7 @@ public class ItemJsonBlock : BaseJsonBlock<ItemJsonDic, ItemJsonStruct, ItemJson
             Initialize(logging);
         }
     }
-    public ItemJsonBlock(ref JObject root, ref JObject data, ref JArray array, Action<string> logging = null)
+    public ItemJsonJArray(ref JObject root, ref JObject data, ref JArray array, Action<string> logging = null)
     {
         if (logging == null)
         {
@@ -122,18 +125,33 @@ public class ItemJsonBlock : BaseJsonBlock<ItemJsonDic, ItemJsonStruct, ItemJson
         items = new JArray();
         data.Add(JArray_Name, items);
     }
-    protected override void Generate()
+    public override void Generate()
     {
         root = new JObject();
         data = new JObject();
         root.Add("data", data);
+        items = new JArray();
+        data.Add(JArray_Name, items);
     }
     public override void Read(string jsonData)
     {
         root = JObject.Parse(jsonData);
         data = root[DATA_KEY_STRING] as JObject;
-        items = data.ContainsKey(JArray_Name) == true ? data[JArray_Name] as JArray : new JArray();
-        logging?.Invoke("JArray is Null");
+        items = data.ContainsKey(JArray_Name) == true ? data[JArray_Name] as JArray : null;
+        if(items.Count == 0 || items == null)
+        {
+            logging?.Invoke("JArray is Null");
+        }
+    }
+    public override void Read(ref JObject root, ref JObject data)
+    {
+        this.root = root;
+        this.data = data;
+        items = data.ContainsKey(JArray_Name) == true ? data[JArray_Name] as JArray : null;
+        if (items.Count == 0 || items == null)
+        {
+            logging?.Invoke("JArray is Null");
+        }
     }
     public override void Read(ref JObject root, ref JObject data, ref JArray array)
     {
@@ -253,4 +271,5 @@ public class ItemJsonBlock : BaseJsonBlock<ItemJsonDic, ItemJsonStruct, ItemJson
     }
     #endregion
 }
+
 
