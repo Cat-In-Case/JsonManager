@@ -91,7 +91,7 @@ public class ItemJsonManager : MonoBehaviour
 
         using(ItemRuntimeParser parser = new ItemRuntimeParser(jsonData))
         {
-            Task<ItemJsonDic> parse = Task <ItemJsonDic>.Run(() => parser.Read());
+            Task<ItemJsonDic> parse = Task<ItemJsonDic>.Run(() => parser.Read());
             yield return new WaitUntil(() => parse.IsCompleted);
 
             if(parse.IsFaulted == true || parse.Result == null)

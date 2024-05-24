@@ -1,4 +1,7 @@
 #define Debug
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 #region Using
 using System;
 using System.Collections;
@@ -26,38 +29,39 @@ public class ItemJsonEditor : MonoBehaviour
         path = Application.dataPath;
     }
 
-
 #if DEBUG
     private void OnGUI()
     {
-        if(GUI.Button(new Rect(Screen.currentResolution.width-100, Screen.currentResolution.height, 100, 60), "ExampleLoad"))
+        if(GUI.Button(new Rect(Screen.currentResolution.width-100, Screen.currentResolution.height-60, 100, 60), "ExampleLoad"))
         {
             DebugLoad();
         }
-        if (GUI.Button(new Rect(Screen.currentResolution.width - 200, Screen.currentResolution.height, 100, 60), "ExampleSave"))
+        if (GUI.Button(new Rect(Screen.currentResolution.width - 200, Screen.currentResolution.height-60, 100, 60), "ExampleSave"))
         {
             DebugSave();
         }
-        if (GUI.Button(new Rect(Screen.currentResolution.width-100, Screen.currentResolution.height-40, 100, 40), "Add"))
+        if (GUI.Button(new Rect(Screen.currentResolution.width-100, Screen.currentResolution.height-100, 100, 40), "Add"))
         {
             Add();
         }
-        if (GUI.Button(new Rect(Screen.currentResolution.width-200, Screen.currentResolution.height-40, 100, 40), "Delete"))
+        if (GUI.Button(new Rect(Screen.currentResolution.width-200, Screen.currentResolution.height-100, 100, 40), "Delete"))
         {
             Delete();
         }
-        if (GUI.Button(new Rect(Screen.currentResolution.width - 100, Screen.currentResolution.height - 80, 100, 40), "Apply"))
+        if (GUI.Button(new Rect(Screen.currentResolution.width - 100, Screen.currentResolution.height - 140, 100, 40), "Search"))
         {
             Search();
         }
-        if (GUI.Button(new Rect(Screen.currentResolution.width-200, Screen.currentResolution.height-80, 100, 40), "Apply"))
+        if (GUI.Button(new Rect(Screen.currentResolution.width-200, Screen.currentResolution.height-140, 100, 40), "Apply"))
         {
             Apply();
         }
+        if (GUI.Button(new Rect(Screen.currentResolution.width - 100, Screen.currentResolution.height - 180, 100, 40), "Sort"))
+        {
+            jsonControl.Sort();
+        }
     }
 #endif
-
-
 
 #if UNITY_EDITOR
     #region Control Function
@@ -137,7 +141,7 @@ public class ItemJsonEditor : MonoBehaviour
         bool loaded = false;
         using (AsyncFileIO io = new AsyncFileIO())
         {
-            Task<bool> isExist = Task<bool>.Run(() => io.FileExist(path, JSONNAME));
+            Task<bool> isExist = Task<bool>.Run(() => io.FileExist(path, JSONNAME + ".json"));
             yield return new WaitUntil(() => isExist.IsCompleted);
 
             if (isExist.Result == false)
@@ -146,13 +150,12 @@ public class ItemJsonEditor : MonoBehaviour
 #if UNITY_EDITOR
                 Debug.Log("Json does not exist ");
 #endif
-                yield break;
             }
 
             if (isExist.Result == true)
             {
 
-                Task<string> fileLoad = Task<string>.Run(() => io.FileLoad(path, JSONNAME));
+                Task<string> fileLoad = Task<string>.Run(() => io.FileLoad(path, JSONNAME + ".json"));
                 yield return new WaitUntil(() => fileLoad.IsCompleted);
 
                 if (fileLoad.IsFaulted == true)
@@ -188,9 +191,11 @@ public class ItemJsonEditor : MonoBehaviour
             jarray.Read(ref root, ref data);
 
             dic = jarray.ToDictionary();
+            Debug.Log("Json Loaded");
         }
         else
         {
+            Debug.Log("Json Generated");
             jarray.Generate();
             dic = jarray.ToDictionary();
         }
@@ -207,7 +212,7 @@ public class ItemJsonEditor : MonoBehaviour
     {
         using (FileIO io = new FileIO())
         {
-            Task<bool> save = Task<bool>.Run(() => io.FileSave(path, JSONNAME, jsonControl.GetJson));
+            Task<bool> save = Task<bool>.Run(() => io.FileSave(path, JSONNAME + ".json", jsonControl.GetJson));
 
             yield return new WaitUntil(() => save.IsCompleted);
 
@@ -221,6 +226,19 @@ public class ItemJsonEditor : MonoBehaviour
             {
                 Debug.Log("Save Success");
             }
+            save.Dispose();
         }
+#if UNITY_EDITOR
+        AssetDatabase.Refresh();
+#endif
+        GC.Collect(2, GCCollectionMode.Optimized);
+    }
+
+
+    private void OnDestroy()
+    {
+        jsonControl.Dispose();
+        jsonControl = null;
+        path = null;
     }
 }

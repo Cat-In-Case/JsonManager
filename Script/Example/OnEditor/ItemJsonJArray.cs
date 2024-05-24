@@ -49,6 +49,19 @@ public struct ItemJsonStruct
 [System.Serializable]
 public class ItemJsonDic : BaseJDictionary<ItemJsonData>
 {
+    public ItemJsonDic()    {    }
+    public ItemJsonDic(IEnumerable<KeyValuePair<int, ItemJsonData>> enumerable)
+    {
+        foreach(KeyValuePair<int, ItemJsonData> pair in enumerable)
+        {
+            if(this.TryAdd(pair.Key, pair.Value) == false)
+            {
+#if UNITY_EDITOR
+                Debug.Log("ItemJsonDic Failed");
+#endif
+            }
+        }
+    }
     public override void FromJArray(ref JArray jarray)
     {
         ItemJsonStruct itemJsonBlock;
@@ -85,7 +98,7 @@ public class ItemJsonDic : BaseJDictionary<ItemJsonData>
 #endregion
 
 
-public class ItemJsonJArray : BaseJArray<ItemJsonDic, ItemJsonStruct, ItemJsonData>
+public class ItemJsonJArray : BaseJArray<ItemJsonDic, ItemJsonStruct, ItemJsonData>, IDisposable
 {
     protected JArray items;
 
@@ -215,9 +228,10 @@ public class ItemJsonJArray : BaseJArray<ItemJsonDic, ItemJsonStruct, ItemJsonDa
         }
         JObject itemData = new JObject();
         itemData.Add(UNIQUEID, block.uniqueID);
-        itemData.Add("nameID", block.name);
-        itemData.Add("dialog", block.description);
+        itemData.Add("name", block.name);
+        itemData.Add("description", block.description);
         items.Add(itemData);
+        itemData = null;    //
         return true;
     }
 
@@ -234,6 +248,7 @@ public class ItemJsonJArray : BaseJArray<ItemJsonDic, ItemJsonStruct, ItemJsonDa
         }
         if (queue.Count == 0)
         {
+            queue = null;
             logging?.Invoke("uniqueID is not exist");
             return false;
         }
@@ -243,6 +258,8 @@ public class ItemJsonJArray : BaseJArray<ItemJsonDic, ItemJsonStruct, ItemJsonDa
             {
                 items.RemoveAt(k);
             }
+            queue.Clear();
+            queue = null;
             return true;
         }
     }
@@ -267,7 +284,17 @@ public class ItemJsonJArray : BaseJArray<ItemJsonDic, ItemJsonStruct, ItemJsonDa
         targetObject[UNIQUEID] = block.uniqueID;
         targetObject["name"] = block.name;
         targetObject["description"] = block.description;
+
+        targetObject = null;    //
         return true;
+    }
+
+    public void Dispose()
+    {
+        root = null;
+        data = null;
+        items = null;
+        logging = null;
     }
     #endregion
 }
