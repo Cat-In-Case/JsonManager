@@ -36,35 +36,38 @@ public class ItemJsonEditControl : IDisposable
     public string GetJson => jsonArray.GetJson();
     [SerializeField] private Action<string> log;
 
-    public JObjectState Exist(ref ItemJsonStruct block)
+    public bool Search(ref ItemJsonStruct block, out JObjectState state)
     {
         int index;
         if (jsonDictionary.ContainsKey(block.uniqueID) == true)
         {
             if (jsonArray.Exist(block, out index) == true)  //Exist
             {
-                log?.Invoke(block.uniqueID + " is Exist"); return JObjectState.Exist;
+                log?.Invoke(block.uniqueID + " is Exist");
+                jsonArray.Search(ref block);
+                state = JObjectState.Exist;                return true;
             }
             else                                             //Error
             {
-                log?.Invoke(block.uniqueID + " : Exist on Dictionary. but not JArray"); return JObjectState.Error;
+                log?.Invoke(block.uniqueID + " : Exist on Dictionary. but not JArray");
+                state = JObjectState.Error;                return false;
             }
         }
         else
         {
             if (jsonArray.Exist(block, out index) == true)  //Error
             {
-                log?.Invoke(block.uniqueID + " : Not exist on Dictionary. exist on JArray"); return JObjectState.Error;
+                log?.Invoke(block.uniqueID + " : Not exist on Dictionary. exist on JArray");
+                state = JObjectState.Error;                return false;
             }
             else                                            //Empty
             {
-                log?.Invoke(block.uniqueID + "  is Not Exists"); return JObjectState.Empty;
+                log?.Invoke(block.uniqueID + "  is Not Exists");
+                block.name = "NULL";
+                block.description = "NULL";
+                state = JObjectState.Empty;                return true;
             }
         }
-    }
-    public void Search(ref ItemJsonStruct block)
-    {
-        jsonArray.Search(ref block);
     }
 
     public bool Add(ref ItemJsonStruct block)

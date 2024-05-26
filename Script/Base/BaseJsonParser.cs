@@ -97,14 +97,14 @@ public class AsyncFileIO : IDisposable
         if (File.Exists(string.Format("{0}/{1}", path, fileName)) == true)
         {
 #if UNITY_EDITOR
-            Debug.Log(Thread.CurrentThread.ManagedThreadId);
+            Debug.Log(Thread.CurrentThread.ManagedThreadId + "   true");
 #endif
             return Task.FromResult(true);
         }
         else
         {
 #if UNITY_EDITOR
-            Debug.Log(Thread.CurrentThread.ManagedThreadId);
+            Debug.Log(Thread.CurrentThread.ManagedThreadId +  "   false");
 #endif
             return Task.FromResult(false);
         }
