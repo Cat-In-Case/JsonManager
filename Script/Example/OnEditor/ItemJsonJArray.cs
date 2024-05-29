@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CustomDictionary.SerializableDictionary;
 #endregion
+using System.Text;
 
 #region ItemData Class & Struct
 [System.Serializable]
@@ -35,6 +36,68 @@ public class ItemJsonData
     [SerializeField] private int uniqueID;
     [SerializeField] private string name;
     [SerializeField] private string description;
+
+    #region
+    /// <summary>
+    /// <para> Hashset, HashTable, Hashmap use GetHashCode </para>
+    /// <para>When A and B is same Object </para>
+    /// <code> 
+    /// | if(A.HashCode() == B.HashCode())
+    /// |     if(A.Equals(B) == true)
+    /// |         Same
+    /// |     else
+    /// |         Different
+    /// | else
+    /// |     Different
+    /// </code>
+    /// <para>Only the fields that enter the equals should be used in GetHashCode</para>
+    /// </summary>
+    /// <returns></returns>
+    #endregion  Summary
+    public override int GetHashCode()   
+    {
+        unchecked    //if Overflow occurs, wrap
+        {
+            int hash = 5387;
+            hash += (hash * 23) + (uniqueID.GetHashCode() * 337);   //if uniqueID is same, two object is same object
+            //hash += name.GetHashCode() * 941;     
+            //hash += description.GetHashCode() * 281;
+            return hash;
+        }
+    }
+    public override bool Equals(object obj)     //List
+    {
+        if (obj is null)    //if obj is Null, return False
+            return false;
+
+        if (object.ReferenceEquals(this, obj) == true)  //Address is same(reference)
+            return true;
+
+        if (!(obj is ItemJsonData)) //클래스가 다름
+            return false;
+        var target = obj as ItemJsonData;
+
+        //about string, compare(==) 
+        ///     string A = "Test";      //compile time constant
+        ///     string B = "Te";
+        ///     B += "st";
+        ///     string C = A;      //Compile time constant
+        ///     string D = new StringBuilder("Test").ToString();    //result of operation
+        ///     object E = C;
+        /*  Cautions
+         * ReferenceEquals(A, B);   //RefenceEqual == false
+         * A==B;        //ValueEquel == true
+         * ReferenceEquals(A, C);   //RefenceEqual == true
+         * A==C;        //ValueEquel == true
+         * ReferenceEquals(A, D);   //RefenceEqual == false
+         * A==D;        //ValueEquel == true
+         * ReferenceEquals(A, E);   //RefenceEqual == true
+         * A==E;        //ValueEquel == false
+        */
+        //In string, == operator perform value equality instead of reference equality.
+        return this.uniqueID == target.uniqueID;
+        //&& (ReferenceEquals(target.name, target.name));   //if uniqueID is same, two object is same object
+    }
 }
 [System.Serializable]
 public struct ItemJsonStruct
